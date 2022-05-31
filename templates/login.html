@@ -1,0 +1,36 @@
+{% extends "index.html" %}
+
+{% block content %}
+<center>
+
+{% if error %}
+    <div class="alert-danger">{{error}}</div>
+{% endif %}
+<br><br>
+<div class="card" style="width: 80%;padding: 20px; text-align: left;">
+    <div class="card-body">
+      <h5 class="card-title">Login</h5><br>
+      <form  action="" method="POST" id="my_form">
+
+          
+          <div class="form-outline" >
+            <label class="form-label" for="username" >Username</label>
+            <input type="text" name="username"  id="username" autocomplete="off" required/>
+            
+          </div><br>
+          <div class="form-outline" >
+            <label class="form-label" for="username">Username</label>
+            <input type="password" name="password" id="password"  required />
+            
+          </div><br>
+          
+          <button type="submit" class="btn btn-primary" >Login</button>
+      </form>
+      
+      
+    </div>
+</div>
+</center>
+     
+
+{% endblock %}

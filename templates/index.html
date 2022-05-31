@@ -10,6 +10,7 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     rel="stylesheet"
     />
+    <script src="/static/enterBlock.js"></script>
     <link rel="stylesheet" href="https://mdbcdn.b-cdn.net/wp-content/themes/mdbootstrap4/docs-app/css/dist/mdb5/standard/core.min.css">
     <!-- Google Fonts -->
     <link
@@ -30,7 +31,7 @@
 <body>
     
 <nav class="navbar navbar-light" style="background-color: #fcf0dc;padding-left:10px">
-    <a><img src="/static/socialCorn.png" width="30">Social Corn</a>
+    <a href="" style="text-decoration:none;color:black"><img src="/static/socialCorn.png" width="30">Social Corn</a>
 </nav>
     {% block content %}
     <div class="container"><br><br>
@@ -41,8 +42,8 @@
                 <div class="card-body">
                   <h5 class="card-title">Login or register</h5>
                   <p class="card-text">Click <a href="/register">here</a> to register to the most reliable social networking site. If you already have an account click <a href="/login">here</a>.</p>
-                  <button type="button" class="btn btn-primary">Login</button>
-                  <button type="button" class="btn btn-primary">Register</button>
+                  <button type="button" class="btn btn-primary" onclick="window.location.assign('/login')">Login</button>
+                  <button type="button" class="btn btn-primary" onclick="window.location.assign('/register')">Register</button>
                 </div>
             </div><br>
             <h1>About</h1><br>

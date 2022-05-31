@@ -1,5 +1,5 @@
 from cryptography.fernet import Fernet
-
+import os
 key= b'oWp9rSuqY8r1CPAkxWjlNkIy_C3PD4JeMFvxNmSdZiQ='
 spttext = "D6SFDSDJEFJDNUFJ47H238743HFBSDJAKHNDNSMAJDNAHDJUEHAJDMAHNNMCNYENDJ432HG"
 crypter = Fernet(key)
@@ -26,3 +26,11 @@ class userEditor:
             }
         except:
             return 404
+
+    def getUserList():
+        users = []
+        userFiles = os.listdir("users")
+        for u in userFiles:
+            users.insert(0,u.replace(".txt",""))
+
+        return users
