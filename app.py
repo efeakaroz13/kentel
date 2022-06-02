@@ -2,6 +2,8 @@
 
 from flask import Flask,render_template,request,redirect,abort,make_response
 
+
+
 from auth import auth
 from userEditor import userEditor
 from cryptography.fernet import Fernet
@@ -21,8 +23,24 @@ def decrypt(text):
     return crypter.decrypt(text.encode()).decode()
 
 app = Flask(__name__)
-@app.route("/")
+@app.route("/",methods=["POST","GET"])
 def index():
+    if request.method == "POST":
+        username = request.cookies.get("username")
+        if username != None:
+            #do thing
+            username = decrypt(username)
+            password = decrypt(request.cookies.get("password"))
+            if auth.sign_in(username,password) == 200:
+                searchusername = request.form.get("search")
+                if userEditor.getUserData(searchusername) == 404:
+                   return render_template("home.html",user_find_error=True,old_search=searchusername)
+                else: 
+                    return redirect("/user/{}".format(searchusername))
+            else:
+                return redirect("/")
+        else:
+            return redirect("/")
     username_cookie = request.cookies.get("username")
     if username_cookie == None:
         return render_template("index.html")
