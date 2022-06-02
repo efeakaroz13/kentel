@@ -116,4 +116,39 @@ def register():
             return response
     return render_template("register.html",auth=auth,userEditor=userEditor)
 
+@app.route("/privacy-policy")
+def privacy_policy():
+    return render_template("privacy-policy.html")
+
+@app.route("/report/<username>")
+def userNameReport(username):
+    try:
+        open("reports.txt","a").write(f"""{username} by {decrypt(request.cookies.get("username"))}""")
+        return render_template("report.html",username=username)
+    except:
+        return abort(403)
+class Admin:
+    @app.route("/admin",methods=["POST","GET"])
+    def admin():
+        if request.method == "POST":
+            username = request.args.get("username")
+            password = request.args.get("password")
+            if username == "admin" and password == "1234":
+                
+                return """
+                    Reports:
+                    Users:
+                
+                """
+            else:
+                return abort(403)
+        return """
+            <form action="" method="POST">
+                <input type="text" placeholder="Username" name="username"><br>
+                <input type="password" placeholder="Password" name="password"><br>
+                <button type="submit">Login</button>
+            </form>
+        
+        """
+
 app.run(debug=True)
