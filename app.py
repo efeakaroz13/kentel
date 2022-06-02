@@ -59,14 +59,37 @@ def index():
 @app.route("/user/<username>")
 def usernameThing(username):
     user = userEditor.getUserData(username)
-    return render_template("profile.html",user=user)
+    #Auth
+    viewerusername = request.cookies.get("username")
+    viewerpassword = request.cookies.get("password")
+    if viewerusername != None:
+        try:
+            #for wrong decrypt credentials and preventing internal server errors
+            viewerusername = decrypt(viewerusername)
+            viewerpassword = decrypt(viewerpassword)
+            if auth.sign_in(viewerusername,viewerpassword) == 200:
+                return render_template("profile.html",user=user)
+            else:
+                #No authentication because they entered the wrong credentials to cookies
+
+                return render_template("profile.html",auth=False,user=user,username=user["username"]) 
+        except:
+            #Return the thing without the auth
+            return render_template("profile.html",auth=False,user=user,username=user["username"]) 
+
+    
+    return render_template("profile.html",user=user,username=user["username"],auth=False)
 
 @app.route("/login",methods=["POST","GET"])
 def login():
+    response = make_response(redirect("/"))
+    next = request.args.get("next")
+    if next != None:
+        response = redirect(next)
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        response = make_response(redirect("/"))
+        
         response.set_cookie("username",encrypt(username))
         response.set_cookie("password",encrypt(password))
         if auth.sign_in(username,password) == 200:
