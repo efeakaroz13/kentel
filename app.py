@@ -38,6 +38,10 @@ def index():
         except:
             return render_template("index.html")
 
+@app.route("/user/<username>")
+def usernameThing(username):
+    user = userEditor.getUserData(username)
+    return render_template("profile.html",user=user)
 
 @app.route("/login",methods=["POST","GET"])
 def login():
