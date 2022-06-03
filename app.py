@@ -131,13 +131,13 @@ class Admin:
     @app.route("/admin",methods=["POST","GET"])
     def admin():
         if request.method == "POST":
-            username = request.args.get("username")
-            password = request.args.get("password")
+            username = request.form.get("username")
+            password = request.form.get("password")
             if username == "admin" and password == "1234":
                 
-                return """
-                    Reports:
-                    Users:
+                return f"""
+                    Reports:{open("reports.txt","r").readlines()}<br><br>
+                    Users:{len(os.listdir("users"))}
                 
                 """
             else:
