@@ -123,7 +123,7 @@ def privacy_policy():
 @app.route("/report/<username>")
 def userNameReport(username):
     try:
-        open("reports.txt","a").write(f"""{username} by {decrypt(request.cookies.get("username"))}""")
+        open("reports.txt","a").write(f"""{username} by {decrypt(request.cookies.get("username"))}\n\n""")
         return render_template("report.html",username=username)
     except:
         return abort(403)
