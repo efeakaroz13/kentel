@@ -1,0 +1,21 @@
+{% extends "index.html" %}
+
+{% block content %}
+    <center><br><br>
+        <div class="card" style="width: 80%;">
+            <div class="card-body">
+                <h5 class="card-title">New chat</h5>
+                <form action="" method="post">
+                    {% if error_user_nf==True %}
+                    <input type="text" name="username" placeholder="Username" id="" class="form-control" style="width: 80%;border:1px solid red">
+                    {% else %}
+                    <input type="text" name="username" placeholder="Username" id="" class="form-control" style="width: 80%;">
+                    {%endif%}
+                   <br><button class="btn btn-warning">Start Chat</button>
+
+                </form>
+            </div>
+        </div>
+    </center>
+
+{% endblock %}

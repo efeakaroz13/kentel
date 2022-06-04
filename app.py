@@ -1,18 +1,35 @@
 #Copyright (c) 2022 Efe Akaröz
 
+from click import password_option
 from flask import Flask,render_template,request,redirect,abort,make_response
-
-
-
+import requests
+import pyrebase
+import random
+import json
 from auth import auth
 from userEditor import userEditor
 from cryptography.fernet import Fernet
 import os
+import time
 
 
 key= b'9oNjb1Ed5JYbIuc1fDo5QDs6tMlNar7Q-m6PcvBxEQo='
 spttext = "D6SFDSDJEFJDNUFJ47H238743HFBSDJAKHNDNSMAJDNAHDJUEHAJDMAHNNMCNYENDJ432HG"
 crypter = Fernet(key)
+
+
+firebaseConfig = {
+  "apiKey": "AIzaSyBlNavL892O3pRipHmjVygFD7Rvh50Kh44",
+  "authDomain": "messagingapppy.firebaseapp.com",
+  "databaseURL": "https://messagingapppy.firebaseio.com",
+  "projectId": "messagingapppy",
+  "storageBucket": "messagingapppy.appspot.com",
+  "messagingSenderId": "930410213927",
+  "appId": "1:930410213927:web:d2c6669258f4bd0fab1402",
+  "measurementId": "G-T4PVT8SJJF"
+}
+firebase = pyrebase.initialize_app(firebaseConfig)
+db = firebase.database()
 
 def encrypt(text):
 
@@ -151,4 +168,93 @@ class Admin:
         
         """
 
+
+@app.route("/inbox")
+def inbox():
+    username = request.cookies.get("username")
+    if username != None:
+        try:
+            username = decrypt(username)
+            password = decrypt(request.cookies.get("password"))
+            if auth.sign_in(username,password) == 200:
+                counter = db.child("Users").child(username).child("counter").get().val()
+                if counter == None:
+                    counter = 0
+                else:
+                    pass
+
+                data = {
+                    "counter":counter+1
+                }
+                db.child("Users").child(username).update(data)
+                return render_template("Inbox.html")
+            else:
+                return redirect("/login?next=/inbox")
+        except:
+            return redirect("/login")
+    else:
+        return redirect("/login?next=/inbox")
+
+@app.route("/new_chat",methods=["POST","GET"])
+def chatcreate():
+    if request.method == "POST":
+        username = request.cookies.get("username")
+        if username == None:
+            return abort(403)
+        else:
+            username = decrypt(username)
+            reciever = request.form.get("username")
+            if username == reciever:
+                return redirect("/inbox")
+            password = decrypt(request.cookies.get("password"))
+            if auth.sign_in(username,password) == 200:
+                userGetterReciever = userEditor.getUserData(reciever)
+                if userGetterReciever == 404:
+                    return render_template("newchat.html",error_user_nf=True)
+                else:
+                    chatid = f"BLACKLIVESMATTER{random.randint(2273457364573,3498576384987)}"
+                    data = {
+                        "creator":username,
+                        "reciever":userGetterReciever,
+                        "timeCreated":time.ctime(time.time()),
+                        "chatid":chatid
+                    }
+                    allConvsUserHave = json.loads(requests.get("https://messagingapppy.firebaseio.com/Users/{}.json".format(username)).content)
+                    exists = False
+                    for conv in allConvsUserHave["inbox"]:
+                        convreciever_usrename = allConvsUserHave["inbox"][conv]["reciever"]["username"]
+                        convcreate_usrename = allConvsUserHave["inbox"][conv]["creator"]
+                        if userGetterReciever["username"] == convcreate_usrename or convreciever_usrename:
+                            exists=True
+                            break
+                    if exists == False:
+                        db.child("conv").child(chatid).set(data)
+                        db.child("Users").child(username).child("inbox").child(chatid).update(data)
+                        db.child("Users").child(userGetterReciever["username"]).child("inbox").child(chatid).update(data)
+                    else:
+                        pass
+
+                    return redirect("/inbox")
+            else:
+                return abort(403)
+    username = request.cookies.get("username")
+
+    if username != None:
+        try:
+            username = decrypt(username)
+            password = decrypt(request.cookies.get("password"))
+            if auth.sign_in(username,password ) == 200:
+                return render_template("newchat.html")
+
+            else:
+                return redirect("/login?next=/new_chat")
+            
+        except:
+            return redirect("/login?next=/new_chat")
+    else:
+        return redirect("/login?next=/new_chat")
+
+@app.route("/api")
+def api():
+    return "api"
 app.run(debug=True)
