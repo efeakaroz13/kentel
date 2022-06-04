@@ -1,5 +1,7 @@
 #Copyright (c) 2022 Efe Akaröz
 
+import contextlib
+import re
 from click import password_option
 from flask import Flask,render_template,request,redirect,abort,make_response
 import requests
@@ -187,7 +189,13 @@ def inbox():
                     "counter":counter+1
                 }
                 db.child("Users").child(username).update(data)
-                return render_template("Inbox.html")
+                inboxData = json.loads(requests.get(firebaseConfig["databaseURL"]+"/Users/{}/inbox.json".format(username)).content)
+                if inboxData == None:
+                    conv_exits=False
+                else:
+                    conv_exits=True
+
+                return render_template("Inbox.html",conv_exists=conv_exits)
             else:
                 return redirect("/login?next=/inbox")
         except:
@@ -254,7 +262,37 @@ def chatcreate():
     else:
         return redirect("/login?next=/new_chat")
 
-@app.route("/api")
+@app.route("/api/dmbox")
 def api():
-    return "api"
+    username = request.cookies.get("username")
+    password = request.cookies.get("password")
+    if username != None:
+        username = decrypt(username)
+        password = decrypt(password)
+        if auth.sign_in(username,password) == 200:
+            #Loading inbox
+            inbox_=[]
+            ConvsDatabase = json.loads(requests.get(firebaseConfig["databaseURL"]+f"/Users/{username}/inbox.json").content)
+            if ConvsDatabase == None:
+                inbox_ = []
+            else:
+                for c in ConvsDatabase:
+                    recieverVariable = ConvsDatabase[c]["reciever"]["username"]
+                    creatorUsernameVariable = ConvsDatabase[c]["creator"]
+                    if recieverVariable == username:
+                        usernameForView = creatorUsernameVariable
+                    else:
+                        usernameForView = recieverVariable
+                    
+                    data = {
+                        "username":usernameForView,
+                        "chatid":ConvsDatabase[c]["chatid"],
+                        
+                    }
+                    inbox_.insert(0,data)
+            return {"auth":True,"inbox":inbox_}
+        else:
+            return {"auth":False}
+    else:
+        return {"auth":False}
 app.run(debug=True)
