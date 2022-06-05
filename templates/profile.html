@@ -23,6 +23,12 @@
     </div>
 </p>
 </center>
+{% if self_view == True %}
+<nav class="navbar fixed-bottom navbar-expand-lg navbar-dark default-color" style="background-color: #d9a211;height: 50px;padding:20px">
+    <a class="navbar-brand"></a>
+    <center><button class="btn btn-warning" style="position:fixed;left:10%;bottom:10px;width: 40%;" onclick="window.location.assign('/')"><i class="fa fa-home"></i></button><button class="btn btn-warning" style="position: fixed;right: 10%;bottom:10px;width: 40%;" onclick="window.location.assign('/user/{{username}}')"><i class="fa fa-user"></i></button></center>
+</nav>
+{% endif %}
      
 
 {% endblock %}

@@ -53,7 +53,7 @@ def index():
             if auth.sign_in(username,password) == 200:
                 searchusername = request.form.get("search")
                 if userEditor.getUserData(searchusername) == 404:
-                   return render_template("home.html",user_find_error=True,old_search=searchusername)
+                   return render_template("home.html",user_find_error=True,old_search=searchusername,username = username)
                 else: 
                     return redirect("/user/{}".format(searchusername))
             else:
@@ -69,7 +69,7 @@ def index():
             password = decrypt(request.cookies.get("password"))
             if auth.sign_in(username,password) == 200:
 
-                return render_template("home.html")
+                return render_template("home.html",username=username)
             else:
                 return render_template("index.html")
         except:
@@ -87,7 +87,10 @@ def usernameThing(username):
             viewerusername = decrypt(viewerusername)
             viewerpassword = decrypt(viewerpassword)
             if auth.sign_in(viewerusername,viewerpassword) == 200:
-                return render_template("profile.html",user=user)
+                if viewerusername == user["username"]:
+                    return render_template("profile.html",user=user,self_view=True)
+                else:
+                    return render_template("profile.html",user=user,self_view=False)
             else:
                 #No authentication because they entered the wrong credentials to cookies
 
@@ -217,6 +220,7 @@ def chatcreate():
             password = decrypt(request.cookies.get("password"))
             if auth.sign_in(username,password) == 200:
                 userGetterReciever = userEditor.getUserData(reciever)
+                userGetterReciever["password"] = "*"
                 if userGetterReciever == 404:
                     return render_template("newchat.html",error_user_nf=True)
                 else:
@@ -229,12 +233,16 @@ def chatcreate():
                     }
                     allConvsUserHave = json.loads(requests.get("https://messagingapppy.firebaseio.com/Users/{}.json".format(username)).content)
                     exists = False
-                    for conv in allConvsUserHave["inbox"]:
-                        convreciever_usrename = allConvsUserHave["inbox"][conv]["reciever"]["username"]
-                        convcreate_usrename = allConvsUserHave["inbox"][conv]["creator"]
-                        if userGetterReciever["username"] == convcreate_usrename or convreciever_usrename:
-                            exists=True
-                            break
+                    try:
+                        for conv in allConvsUserHave["inbox"]:
+                            convreciever_usrename = allConvsUserHave["inbox"][conv]["reciever"]["username"]
+                            convcreate_usrename = allConvsUserHave["inbox"][conv]["creator"]
+                            if userGetterReciever["username"] == convcreate_usrename or convreciever_usrename:
+                                exists=True
+                                break
+
+                    except:
+                        exists = False
                     if exists == False:
                         db.child("conv").child(chatid).set(data)
                         db.child("Users").child(username).child("inbox").child(chatid).update(data)
@@ -295,4 +303,32 @@ def api():
             return {"auth":False}
     else:
         return {"auth":False}
+
+@app.route("/chat/<chatid>")
+def chat(chatid):
+    username = request.cookies.get("username")
+    password = request.cookies.get("password")
+    if username == None:
+        return redirect("/login")
+    else:
+        try:
+            username = decrypt(username)
+            password = decrypt(password)
+            if auth.sign_in(username,password) == 200:
+                chat_credentials = json.loads(requests.get(firebaseConfig["databaseURL"]+"/conv/{}.json".format(chatid)).content)
+                if chat_credentials == None:
+                    return render_template("/inbox")
+                else:
+                    creatorChat = chat_credentials["creator"]
+                    reciever_chat = chat_credentials["reciever"]["username"]
+                    if username == creatorChat:
+                        viewusername = reciever_chat
+                    else:
+                        viewusername = creatorChat
+                    
+                    return render_template("chat.html",chat_credentials=chat_credentials,viewusername=viewusername)
+            else:
+                return redirect("/login")
+        except:
+            return redirect("/login")
 app.run(debug=True)
