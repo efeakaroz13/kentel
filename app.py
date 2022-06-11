@@ -326,9 +326,38 @@ def chat(chatid):
                     else:
                         viewusername = creatorChat
                     
-                    return render_template("chat.html",chat_credentials=chat_credentials,viewusername=viewusername)
+                    return render_template("chat.html",chat_credentials=chat_credentials,viewusername=viewusername,chatid=chatid)
             else:
                 return redirect("/login")
         except:
             return redirect("/login")
+
+
+@app.route("/msg/send/<chat>",methods=["POST"])
+def post_send_msg(chat):
+    username = request.cookies.get("username")
+    password = request.cookies.get("password")
+    if username == None:
+        return {"success":False,"nousername":True}
+    else:
+        try:
+            username = decrypt(username)
+            password=  decrypt(password)
+            msg = request.form.get("msg")
+            if msg.strip()=="":
+                return {"success":False,"e":"strip"}
+            else:
+                data = {
+                    "content":msg,
+                    "sender":username,
+                    "time":time.time(),
+                    "success":True
+                    
+                }
+                db.child("conv").child(chat).child("msgs").push(data)
+                db.child("conv").child(chat).update({"lastmsg":msg})
+                return data
+        except Exception as e:
+            return{"success":False,"e":e}
+    
 app.run(debug=True)
