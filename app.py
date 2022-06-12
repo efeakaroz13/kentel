@@ -359,5 +359,33 @@ def post_send_msg(chat):
                 return data
         except Exception as e:
             return{"success":False,"e":e}
+
+@app.route("/fetch/msgs/<chat>")
+def fetch(chat):
+    username = request.cookies.get("username")
+    password = request.cookies.get("password")
+    chatcredentials = json.loads(requests.get(firebaseConfig["databaseURL"]+"/conv/{}.json".format(chat)).content)
+    creatorchat = chatcredentials["creator"]
+    reciever = chatcredentials["reciever"]["username"]
+    try:
+        if decrypt(username) != creatorchat and decrypt(username) != reciever:
+            
+            return abort(403)
+    except:
+        return abort(403)
+    if username == None:
+        return {"success":False}
+    else:
+        try:
+            username = decrypt(username)
+            password=  decrypt(password)
+            chatdata = json.loads(requests.get(firebaseConfig["databaseURL"]+"/conv/{}/msgs.json".format(chat)).content)
+            if chatdata == None:
+                chatdata = []
+            else:
+                pass
+            return {"success":True,"data":chatdata}
+        except:
+            return {"success":False}
     
 app.run(debug=True)
