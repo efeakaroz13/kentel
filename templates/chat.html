@@ -3,16 +3,22 @@
 {% block content %}
     <script src="/static/send.js"></script>
     <script src="/static/loadmsg.js"></script>
-    <script>loadmsg("{{chatid}}")</script>
-    <ul class="list-group">
-        <li class="list-group-item">{{viewusername}}</li>
+    <link rel="stylesheet" href="/static/msgcontroller.css">
+    <ul class="chat" id="msgs" >
+        
 
 
     </ul>
-    {{chat_credentials}}
+    <script>
+    
+    loadmsg()
+    
+    setInterval(loadmsg,500)
+    </script>
 
-    <nav class="navbar fixed-bottom navbar-expand-lg navbar-dark default-color" style="background-color: #d9a211;height: 50px;padding:20px">
-        <a class="navbar-brand"></a>
+
+    <nav class="navbar fixed-bottom navbar-expand-lg navbar-light bg-dark" style="height: 50px;padding:20px">
+        <a class="navbar-brand" href="/"> <img src="/static/kentel-light.png" width="30" alt=""></a>
         <center><input type="text" name="msg" id="msg" style="width: 70%; position:fixed;left:10%;right: 20%; bottom:5px" autocomplete="off" autocapitalize="off" placeholder="Enter a message..."></center>
         <button style="width: 15%; position:fixed;right: 5px; bottom:5px" class="btn btn-light" onclick="sendmsg('{{chatid}}','msg')">Enter</button>
     </nav>

@@ -9,24 +9,39 @@
 
         <div class="card-body">
             <br>
-            <h5 class="card-title">{{user["fullName"]}}</h5>
+            <h5 class="card-title">{{user["fullName"]}}
+                {% if self_view == True %}
+                (You)
+                {% endif %}
+            </h5>
+            {% if self_view == True %}
+            <p class="card-body" style="text-align: left;">@{{user["username"]}}(<a href="/logout" style="color:red">Logout</a>)</p>
+
+            {% else %}
             <p class="card-body" style="text-align: left;">@{{user["username"]}}</p>
-            <br>
+
+            {% endif %}
+           <br>
             {% if auth == False %}
             <button class="btn btn-primary" onclick="window.location.assign('/login?next=/user/{{username}}')">Login for actions</button>
             {% else %}
             <button class="btn btn-primary">Follow <i class="fa fa-plus"></i></button>
             <button class="btn btn-danger">Report <i class="fa fa-danger"></i></button>
-            <button class="btn btn-info">Message <i class="fa fa-message"></i></button>
+            {% if self_view == True %}
+                <button class="btn btn-info" disabled>Message <i class="fa fa-message"></i></button>
+            {% else %}
+                <button class="btn btn-info" onclick="window.location.assign('/create_msg/{{user["username"]}}')">Message <i class="fa fa-message"></i></button>
+            {% endif %}
+            
             {% endif %}
         </div>
     </div>
 </p>
 </center>
 {% if self_view == True %}
-<nav class="navbar fixed-bottom navbar-expand-lg navbar-dark default-color" style="background-color: #d9a211;height: 50px;padding:20px">
+<nav class="navbar fixed-bottom navbar-expand-lg navbar-light default-color bg-dark" style="height: 50px;padding:20px">
     <a class="navbar-brand"></a>
-    <center><button class="btn btn-warning" style="position:fixed;left:10%;bottom:10px;width: 40%;" onclick="window.location.assign('/')"><i class="fa fa-home"></i></button><button class="btn btn-warning" style="position: fixed;right: 10%;bottom:10px;width: 40%;" onclick="window.location.assign('/user/{{username}}')"><i class="fa fa-user"></i></button></center>
+    <center><button class="btn " style="position:fixed;left:10%;bottom:10px;width: 40%;" onclick="window.location.assign('/')"><i class="fa fa-home"></i></button><button class="btn" style="position: fixed;right: 10%;bottom:10px;width: 40%;" onclick="window.location.assign('/user/{{username}}')"><i class="fa fa-user"></i></button></center>
 </nav>
 {% endif %}
      

@@ -9,14 +9,14 @@
             {% if user_find_error == True %}
                 <input type="text" style="margin-right:10px;width: 70%; height: 37px; border:1px solid rgb(254, 65, 65);border-radius: 5px; padding-left:10px" value="{{old_search}}" name="search"autocomplete="off"  placeholder="Username"><button class="btn btn-warning" style="width: 20%;"><i class="fa fa-search"></i></button>
             {% else %}
-            <input type="text" style="margin-right:10px;width: 70%; height: 37px; border:1px solid rgb(151, 150, 150);border-radius: 5px; padding-left:10px" name="search"autocomplete="off"  placeholder="Username"><button class="btn btn-warning" style="width: 20%;"><i class="fa fa-search"></i></button>
+            <input type="text" style="margin-right:10px;width: 70%; height: 37px; border:1px solid rgb(151, 150, 150);border-radius: 5px; padding-left:10px" name="search"autocomplete="off"  placeholder="Username"><button class="btn btn-dark" style="width: 20%;color:white"><i class="fa fa-search"></i></button>
             {% endif %}
             </form>
         </div>
     </div>
     </center>
-    <nav class="navbar fixed-bottom navbar-expand-lg navbar-dark default-color" style="background-color: #d9a211;height: 50px;padding:20px">
+    <nav class="navbar fixed-bottom navbar-expand-lg navbar-light default-color bg-dark" style="height: 50px;padding:20px">
         <a class="navbar-brand"></a>
-        <center><button class="btn btn-warning" style="position:fixed;left:10%;bottom:10px;width: 40%;" onclick="window.location.assign('/')"><i class="fa fa-home"></i></button><button class="btn btn-warning" style="position: fixed;right: 10%;bottom:10px;width: 40%;" onclick="window.location.assign('/user/{{username}}')"><i class="fa fa-user"></i></button></center>
+        <center><button class="btn " style="position:fixed;left:10%;bottom:10px;width: 40%;" onclick="window.location.assign('/')"><i class="fa fa-home"></i></button><button class="btn" style="position: fixed;right: 10%;bottom:10px;width: 40%;" onclick="window.location.assign('/user/{{username}}')"><i class="fa fa-user"></i></button></center>
     </nav>
 {% endblock %}

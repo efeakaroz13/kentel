@@ -88,9 +88,9 @@ def usernameThing(username):
             viewerpassword = decrypt(viewerpassword)
             if auth.sign_in(viewerusername,viewerpassword) == 200:
                 if viewerusername == user["username"]:
-                    return render_template("profile.html",user=user,self_view=True)
+                    return render_template("profile.html",user=user,self_view=True,username = username)
                 else:
-                    return render_template("profile.html",user=user,self_view=False)
+                    return render_template("profile.html",user=user,self_view=False,username = username)
             else:
                 #No authentication because they entered the wrong credentials to cookies
 
@@ -306,6 +306,7 @@ def api():
 
 @app.route("/chat/<chatid>")
 def chat(chatid):
+    
     username = request.cookies.get("username")
     password = request.cookies.get("password")
     if username == None:
@@ -325,8 +326,9 @@ def chat(chatid):
                         viewusername = reciever_chat
                     else:
                         viewusername = creatorChat
-                    
-                    return render_template("chat.html",chat_credentials=chat_credentials,viewusername=viewusername,chatid=chatid)
+                    response = make_response(render_template("chat.html",chat_credentials=chat_credentials,viewusername=viewusername,chatid=chatid,username=username))
+                    response.set_cookie("chat",chatid)
+                    return response
             else:
                 return redirect("/login")
         except:
@@ -343,6 +345,10 @@ def post_send_msg(chat):
         try:
             username = decrypt(username)
             password=  decrypt(password)
+            # chatcredentials = json.loads(requests.get(firebaseConfig["databaseURL"]+"/conv/{}.json".format(chat)).content)
+            # chatcreatorusername  =chatcredentials["creator"]
+            # recieverchatusername = chatcredentials["reciever"]["username"]
+            # if username == chatcreatorusername or recieverchatusername == username:
             msg = request.form.get("msg")
             if msg.strip()=="":
                 return {"success":False,"e":"strip"}
@@ -357,16 +363,22 @@ def post_send_msg(chat):
                 db.child("conv").child(chat).child("msgs").push(data)
                 db.child("conv").child(chat).update({"lastmsg":msg})
                 return data
+            # else:
+            #     return abort(403)
+
+
         except Exception as e:
             return{"success":False,"e":e}
 
-@app.route("/fetch/msgs/<chat>")
-def fetch(chat):
+@app.route("/fetch/msgs")
+def fetch():
     username = request.cookies.get("username")
     password = request.cookies.get("password")
+    chat = request.cookies.get("chat")
     chatcredentials = json.loads(requests.get(firebaseConfig["databaseURL"]+"/conv/{}.json".format(chat)).content)
     creatorchat = chatcredentials["creator"]
     reciever = chatcredentials["reciever"]["username"]
+    
     try:
         if decrypt(username) != creatorchat and decrypt(username) != reciever:
             
@@ -379,13 +391,99 @@ def fetch(chat):
         try:
             username = decrypt(username)
             password=  decrypt(password)
-            chatdata = json.loads(requests.get(firebaseConfig["databaseURL"]+"/conv/{}/msgs.json".format(chat)).content)
+            chatdata=[]
+            cdata = json.loads(requests.get(firebaseConfig["databaseURL"]+"/conv/{}/msgs.json".format(chat)).content)
+            for c in cdata:
+                chatdata.insert(0,cdata[c])
             if chatdata == None:
                 chatdata = []
             else:
                 pass
-            return {"success":True,"data":chatdata}
+            return {"success":True,"val":chatdata}
         except:
             return {"success":False}
     
-app.run(debug=True)
+
+@app.route("/getUsername")
+def getUsername():
+    try:
+        return {"username":decrypt(request.cookies.get("username"))}
+    except:
+        return abort(403)
+
+@app.route("/create_msg/<reciever>")
+def create_username(reciever):
+    username = request.cookies.get("username")
+    password = request.cookies.get("password")
+    try:
+        username = decrypt(username)
+        password = decrypt(password)
+
+
+
+
+
+
+        if username == reciever:
+            return redirect("/inbox")
+        
+
+        password = decrypt(request.cookies.get("password"))
+
+        if auth.sign_in(username,password) == 200:
+            userGetterReciever = userEditor.getUserData(reciever)
+            userGetterReciever["password"] = "*"
+            if userGetterReciever == 404:
+                return redirect("/user/"+reciever)
+            else:
+                chatid = f"BLACKLIVESMATTER{random.randint(2273457364573,3498576384987)}"
+                data = {
+                    "creator":username,
+                    "reciever":userGetterReciever,
+                    "timeCreated":time.ctime(time.time()),
+                    "chatid":chatid
+                }
+                allConvsUserHave = json.loads(requests.get("https://messagingapppy.firebaseio.com/Users/{}.json".format(username)).content)
+                exists = False
+                try:
+                    for conv in allConvsUserHave["inbox"]:
+                        convreciever_usrename = allConvsUserHave["inbox"][conv]["reciever"]["username"]
+                        convcreate_usrename = allConvsUserHave["inbox"][conv]["creator"]
+                        if userGetterReciever["username"] == convcreate_usrename or convreciever_usrename:
+                            exists=True
+                            break
+
+                except:
+                    exists = False
+                if exists == False:
+                    db.child("conv").child(chatid).set(data)
+                    db.child("Users").child(username).child("inbox").child(chatid).update(data)
+                    db.child("Users").child(userGetterReciever["username"]).child("inbox").child(chatid).update(data)
+                else:
+                    pass
+
+                return redirect("/inbox")
+        else:
+            return {"status":403}
+
+
+
+
+
+
+
+
+        
+    except:
+        return abort(403)
+   
+
+
+@app.route("/logout")
+def logout():
+    response=  make_response(redirect("/"))
+    response.set_cookie("username",max_age=0)
+    return response
+
+if __name__ == "__main__":
+    app.run(debug=True,threaded=True)
