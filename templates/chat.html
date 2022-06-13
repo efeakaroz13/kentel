@@ -22,5 +22,6 @@
         <center><input type="text" name="msg" id="msg" style="width: 70%; position:fixed;left:10%;right: 20%; bottom:5px" autocomplete="off" autocapitalize="off" placeholder="Enter a message..."></center>
         <button style="width: 15%; position:fixed;right: 5px; bottom:5px" class="btn btn-light" onclick="sendmsg('{{chatid}}','msg')">Enter</button>
     </nav>
+    <textarea name="old" id="old" style="display: none;" cols="30" rows="10"></textarea>
 
 {% endblock %}
