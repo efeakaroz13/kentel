@@ -1,4 +1,4 @@
-# Social Corn
+# Kentel
 
-Brand new social media platform with fully encrypted algorithm
+Minimalist and fast social media platform
  
